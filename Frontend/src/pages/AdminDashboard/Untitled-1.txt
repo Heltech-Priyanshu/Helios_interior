@@ -1,0 +1,269 @@
+import React, { useState } from "react";
+import axios from "axios";
+import { IoMdAddCircle } from "react-icons/io";
+import { companyDetails } from "../../services/api";
+
+function CompanyDetails() {
+  const [formData, setFormData] = useState({
+    company_name: "",
+    email: [""],
+    phone: [""],
+    address: "",
+    copy_right: "",
+    office_hour_time: "",
+    office_day: "",
+    logo: null,
+    fav_icon: null,
+  });
+
+  // Handle normal inputs (text, file etc)
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+
+    if (files) {
+      setFormData({
+        ...formData,
+        [name]: files[0],
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  // Handle array fields (email, phone)
+  const handleArrayChange = (e, index, field) => {
+    const newArr = [...formData[field]];
+    newArr[index] = e.target.value;
+    setFormData({ ...formData, [field]: newArr });
+  };
+
+  // Add new input field
+  const addField = (field) => {
+    setFormData({
+      ...formData,
+      [field]: [...formData[field], ""],
+    });
+  };
+
+  // Remove input field
+  const removeField = (field, index) => {
+    const newArr = [...formData[field]];
+    if (newArr.length > 1) {
+      newArr.splice(index, 1);
+      setFormData({ ...formData, [field]: newArr });
+    }
+  };
+
+  // Submit form
+  const handelSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = new FormData();
+
+      data.append("company_name", formData.company_name);
+      data.append("email", JSON.stringify(formData.email));
+      data.append("phone", JSON.stringify(formData.phone));
+      data.append("address", formData.address);
+      data.append("copy_right", formData.copy_right);
+      data.append("office_hour_time", formData.office_hour_time);
+      data.append("office_day", formData.office_day);
+      data.append("company_logo", formData.logo);
+      data.append("company_favicon", formData.fav_icon);
+
+      const res = await axios.post(companyDetails.createCompany, data);
+      console.log(res);
+      alert("Company Created Successfully!");
+
+    } catch (error) {
+      console.log("error", error);
+      alert("Error while submitting form!");
+    }
+  };
+
+  return (
+    <>
+      <div className="w-full min-h-screen bg-gray-100 flex justify-center items-center p-10">
+        <form
+          onSubmit={handelSubmit}
+          className="w-full max-w-4xl bg-white shadow-xl rounded-2xl p-8"
+        >
+          <h2 className="text-3xl font-bold mb-8">Company Details Form</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Company Name */}
+            <div>
+              <label className="block mb-2 font-semibold">Company Name</label>
+              <input
+                type="text"
+                name="company_name"
+                value={formData.company_name}
+                onChange={handleChange}
+                placeholder="Enter company name"
+                className="w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+
+            {/* Address */}
+            <div>
+              <label className="block mb-2 font-semibold">Address</label>
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Enter address"
+                className="w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+
+            {/* Phone dynamic fields */}
+            <div>
+              <label className="block mb-2 font-semibold">Phone</label>
+
+              {formData.phone.map((value, index) => (
+                <div key={index} className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={(e) => handleArrayChange(e, index, "phone")}
+                    placeholder="Enter phone number"
+                    className="w-full border border-gray-300 rounded-lg p-3"
+                  />
+                  {index === 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => addField("phone")}
+                      className="text-green-600 text-3xl"
+                    >
+                      <IoMdAddCircle />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => removeField("phone", index)}
+                      className="text-red-600 text-xl"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Email dynamic fields */}
+            <div>
+              <label className="block mb-2 font-semibold">Email</label>
+
+              {formData.email.map((value, index) => (
+                <div key={index} className="flex items-center gap-2 mb-2">
+                  <input
+                    type="email"
+                    value={value}
+                    onChange={(e) => handleArrayChange(e, index, "email")}
+                    placeholder="Enter email"
+                    className="w-full border border-gray-300 rounded-lg p-3"
+                  />
+                  {index === 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => addField("email")}
+                      className="text-green-600 text-3xl"
+                    >
+                      <IoMdAddCircle />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => removeField("email", index)}
+                      className="text-red-600 text-xl"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Copyright */}
+            <div>
+              <label className="block mb-2 font-semibold">Copyright</label>
+              <input
+                type="text"
+                name="copy_right"
+                value={formData.copy_right}
+                onChange={handleChange}
+                placeholder="Enter copyright"
+                className="w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+
+            {/* Office Time */}
+            <div>
+              <label className="block mb-2 font-semibold">Office Hour Time</label>
+              <input
+                type="text"
+                name="office_hour_time"
+                value={formData.office_hour_time}
+                onChange={handleChange}
+                placeholder="10AM - 7PM"
+                className="w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+
+            {/* Office Day */}
+            <div>
+              <label className="block mb-2 font-semibold">Office Day</label>
+
+              <input
+                type="text"
+                name="office_day"
+                value={formData.office_day}
+                onChange={handleChange}
+                placeholder="Mon - Sat"
+                className="w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+
+            {/* Logo */}
+            <div>
+              <label className="block mb-2 font-semibold">Logo</label>
+              <input
+                type="file"
+                name="logo"
+                accept="image/*"
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+
+            {/* Favicon */}
+            <div>
+              <label className="block mb-2 font-semibold">Favicon</label>
+              <input
+                type="file"
+                name="fav_icon"
+                accept="image/*"
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3"
+              />
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="mt-8 bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
+    </>
+  );
+}
+
+export default CompanyDetails;
